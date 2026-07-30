@@ -97,13 +97,16 @@ def _loadCallHomeConfig()->Tuple[str, int]:
 
 (CALL_HOME_TOKEN, DEVICE_MODEL, CALL_HOME_PORT, CALL_HOME_FB_PORT) = _loadCallHomeConfig()
 
-def _loadFactorySetting()->Tuple[str, str, str, str]:
+def _loadFactorySetting()->Tuple[str, str, str, str, str]:
     data = yamlFileLoader(f'{__YAML_DIR}/factory_setting.yaml')
     return (data['user']['username'], data['user']['password'],
-            data['user']['enterprise'], data['device_group'])
-(DEFAULT_USER, DEFAULT_PWD, DEFAULT_ETP, GROUP) = _loadFactorySetting()
+            data['user']['enterprise'], data['device_group'],
+            data.get('gateway_id', ''))
+(DEFAULT_USER, DEFAULT_PWD, DEFAULT_ETP, GROUP, GATEWAY_ID) = _loadFactorySetting()
 
 def getSerialNumber()->str:
+    if GATEWAY_ID:
+        return GATEWAY_ID
     try:
         with open('/proc/cpuinfo', 'r') as file:
             for line in file:
