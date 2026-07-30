@@ -1,0 +1,7 @@
+database:
+  username: rostek
+  password: Y1je3aRUjxJ1976
+  host: localhost
+  port: 3306
+  database_name: rostek_gateway
+  limit_record: 1000

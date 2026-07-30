@@ -1,0 +1,11 @@
+[Unit]
+Description=rostek-oee
+After=network-online.target
+[Service]
+Type=idle
+Restart=on-failure
+ExecStart=/home/pi/src/rostek-oee-gateway-v2/venv/bin/python main.py
+WorkingDirectory=/home/pi/src/rostek-oee-gateway-v2
+User=pi
+[Install]
+WantedBy=multi-user.target

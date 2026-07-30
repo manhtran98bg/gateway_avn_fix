@@ -1,0 +1,59 @@
+callhome:
+  callhome_token: UjjYhhjlkahsdqs
+  device_model: gateway
+  feedback_port: 15758
+  server_port: 13526
+com:
+- name: rs485-1
+  port: /dev/ttyAMA2
+- name: rs485-2
+  port: /dev/ttyAMA3
+- name: rs485-3
+  port: /dev/ttyAMA1
+- name: rs485-4
+  port: /dev/ttyAMA4
+- name: rs232
+  port: /dev/serial0
+database_config:
+  database:
+    database_name: rostek_gateway
+    host: localhost
+    limit_record: 1000
+    password: Y1je3aRUjxJ1976
+    port: 3306
+    username: rostek
+factory_setting:
+  device_group: Main Group
+  user:
+    enterprise: rostek
+    password: admin
+    username: admin
+logging:
+  fmt: '[%(hostname)s] [%(filename)s:%(lineno)s - %(funcName)s() ] %(asctime)s %(levelname)s
+    %(message)s'
+  level: info
+mqtt:
+  default_port: 502
+  maximum_send_failed: 5
+oee:
+  sending_rate: 0.5
+redis:
+  host: localhost
+  password: ''
+  port: 6379
+  topic_prefix:
+  - name: SIEMENSINFO
+    topic: /info/siemens
+  - name: DELTAINFO
+    topic: /info/delta
+  - name: HUMTEMPTOPIC
+    topic: /humtemp
+software_version:
+  api_version: v31
+  author: KienPVT
+  email: kienpvt@rostek.com.vn
+  enterprise: duchieu
+  software_version:
+    major: 4
+    minor: 1
+    path: 0

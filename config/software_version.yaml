@@ -1,0 +1,11 @@
+software_version:
+  major: 4
+  minor: 1
+  path: 0
+
+api_version: "v2.0.0"
+
+author: KienPVT
+email: kienpvt@rostek.com.vn
+
+enterprise: duchieu

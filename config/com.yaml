@@ -1,0 +1,10 @@
+- name: rs485-1
+  port: /dev/ttyAMA2
+- name: rs485-2
+  port: /dev/ttyAMA3
+- name: rs485-3
+  port: /dev/ttyAMA1
+- name: rs485-4
+  port: /dev/ttyAMA4
+- name: rs232
+  port: /dev/serial0

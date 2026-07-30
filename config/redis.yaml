@@ -1,0 +1,10 @@
+host: localhost
+port: 6379
+password: ""
+topic_prefix:
+  - name: SIEMENSINFO
+    topic: /info/siemens
+  - name: DELTAINFO
+    topic: /info/delta
+  - name: HUMTEMPTOPIC
+    topic: /humtemp

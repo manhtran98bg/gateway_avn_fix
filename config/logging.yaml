@@ -1,0 +1,4 @@
+fmt: '[%(hostname)s] [%(filename)s:%(lineno)s - %(funcName)s() ] %(asctime)s %(levelname)s %(message)s'
+level: info
+limit_logger_file: 7
+download_logger_token: rostek@2019#
