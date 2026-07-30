@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
-import logging, os
+import logging, os, threading
+from time import sleep
 
 #set up PATH to APP
 APP_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,13 +20,52 @@ logging.info(f"+ Software version: {SOFTWARE_VER.upper()}")
 logging.info(f"+ Logging: {LOGGING_LEVEL.upper()}")
 
 from redis import Redis
+from redis.exceptions import RedisError
 
-redis_client = Redis(
+class ReconnectingRedis:
+    def __init__(self, **kwargs):
+        self._kwargs = kwargs
+        self._lock = threading.Lock()
+        self._client = self._create_client()
+
+    def _create_client(self):
+        return Redis(**self._kwargs)
+
+    def _reconnect(self):
+        with self._lock:
+            try:
+                self._client.connection_pool.disconnect()
+            except Exception as e:
+                logging.warning(f"Redis disconnect before reconnect failed: {e}")
+            self._client = self._create_client()
+
+    def __getattr__(self, name):
+        attr = getattr(self._client, name)
+        if not callable(attr):
+            return attr
+
+        def wrapper(*args, **kwargs):
+            last_error = None
+            for attempt in range(2):
+                try:
+                    return getattr(self._client, name)(*args, **kwargs)
+                except (RedisError, OSError) as e:
+                    last_error = e
+                    logging.warning(f"Redis command {name} failed. Reconnect attempt {attempt + 1}: {e}")
+                    self._reconnect()
+                    sleep(0.2)
+            raise last_error
+        return wrapper
+
+redis_client = ReconnectingRedis(
     host=REDIS_HOST,
     port=REDIS_PORT,
     password=REDIS_PWD,
-    charset="utf-8",
-    decode_responses = True
+    encoding="utf-8",
+    decode_responses=True,
+    socket_connect_timeout=3,
+    socket_timeout=3,
+    retry_on_timeout=True
 )
 
 #Load database

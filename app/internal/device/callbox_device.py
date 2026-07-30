@@ -151,7 +151,12 @@ class CallBoxDevice(MonitorDevice):
         for i in range(self.number_of_button):
             self.led[f'led{i+1}'] = information[f'fb{i+1}']
             del information[f'fb{i+1}']
-        self.uptime = redis_client.hgetall(self._uptime_topic)
+        try:
+            redis_uptime = redis_client.hgetall(self._uptime_topic)
+            if redis_uptime:
+                self.uptime = redis_uptime
+        except Exception as e:
+            logging.warning(f"Redis read failed for {self._uptime_topic}. Use memory cache: {e}")
         self.disconnected_log = False
         self.last_time_read_success = time.time()
         send_to_be = {}
@@ -163,7 +168,11 @@ class CallBoxDevice(MonitorDevice):
                 save_to_redis[key] = information[key]
             self.button_information[register] = information[register]
         if len(send_to_be) != 0:
-            redis_client.hset(self._uptime_topic, mapping=save_to_redis)
+            self.uptime.update(save_to_redis)
+            try:
+                redis_client.hset(self._uptime_topic, mapping=save_to_redis)
+            except Exception as e:
+                logging.warning(f"Redis write failed for {self._uptime_topic}. Keep memory cache only: {e}")
             timeout_call_api = self.device.get('timeout_call_api')
             port = self.device["server_port"]
             url = f'http://{self.device["server_ip"]}:{port}/trigger'
