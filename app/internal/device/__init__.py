@@ -75,7 +75,7 @@ class MonitorDevice(ABC):
             if working_time >= timeout:
                 return
             else:
-                timeout = working_time
+                timeout = timeout - working_time
         self.waiting.wait(timeout)
 
     def _setup(self):
@@ -115,9 +115,11 @@ class MonitorDevice(ABC):
                         self._last_read_status = False
                         self._connectPLC()
                     elif not self._readDeviceData():
-                        self.wait(5.0)
                         self._last_read_status = False
                         self._connect_failed_cnt += 1
+                        logging.warning(f"Read PLC failed. Reconnect device {self._id}")
+                        self._disconnectPLC()
+                        self.wait(5.0, start_loop)
                         # print("READ FAIL", self._id)
                     else:
                         self._connect_failed_cnt = 0
@@ -127,6 +129,7 @@ class MonitorDevice(ABC):
                 self._last_read_status = False
                 self._connect_failed_cnt += 1
                 logging.error(e)
+                self._disconnectPLC()
                 self.wait(5.0, start_loop)
             if self._connect_failed_cnt == 3:
                 # print("READ TIMEOUT. Reconnect", self._id)
