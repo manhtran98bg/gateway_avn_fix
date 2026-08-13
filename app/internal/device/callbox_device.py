@@ -13,6 +13,8 @@ from requests.auth import HTTPBasicAuth
 from app.dependencies.util.time_util import get_ip
 from app.dependencies.register_format import RegisterFormat
 
+AUTO_LINE_DEVICE_ID = "device5489411b-8562-4ac2-826f-e2fccbb142b3"
+
 @MonitorDevice.registerDevice(DeviceTypes.CALL_BOX.value, "Class for monitoring Call Box")
 class CallBoxDevice(MonitorDevice):
     register_required: List[str] = ['button_{no}', 'b{no}_id', 'fb{no}']
@@ -161,11 +163,21 @@ class CallBoxDevice(MonitorDevice):
         self.last_time_read_success = time.time()
         send_to_be = {}
         save_to_redis = {}
+        is_auto_line = self._id == AUTO_LINE_DEVICE_ID
         for key in self.button_mapping:
             register = self.button_mapping[key]
             if information[key] != int(self.uptime[key]):
                 send_to_be[register] = information[register]
                 save_to_redis[key] = information[key]
+            old_action = self.button_information.get(register)
+            new_action = information[register]
+            if is_auto_line and old_action != new_action:
+                logging.info(
+                    f"Auto line PLC button state changed device_id={self._id} "
+                    f"button_id={int(register.split('_')[-1])} button={register} "
+                    f"old_action={old_action} new_action={new_action} "
+                    f"id_register={key} old_id={self.uptime.get(key)} new_id={information[key]}"
+                )
             self.button_information[register] = information[register]
         if len(send_to_be) != 0:
             self.uptime.update(save_to_redis)
@@ -192,7 +204,7 @@ class CallBoxDevice(MonitorDevice):
             }
             # TEMP: If pwm or auto line, then not send
             if plc_id == "device0fc9ab1c-61bd-495e-8a03-1025119376dd" or\
-                plc_id == "device5489411b-8562-4ac2-826f-e2fccbb142b3":
+                plc_id == AUTO_LINE_DEVICE_ID:
                 return
             try:
                 response = requests.post(url, auth=HTTPBasicAuth(username=self.device['username'], 
